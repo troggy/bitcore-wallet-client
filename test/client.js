@@ -1522,6 +1522,21 @@ describe('client API', function() {
       });
     });
 
+    it('should support txs with no change address', function(done) {
+      var opts2 = _.cloneDeep(opts);
+      opts2.outputs.push({
+        amount: 1e8 - _.sum(opts.outputs, 'amount') - 3650, // Fee for this tx
+        toAddress: toAddress,
+      });
+      clients[0].sendTxProposal(opts2, function(err, txp) {
+        should.not.exist(err);
+        var t = Client.buildTx(txp);
+        t.toObject().outputs.length.should.equal(opts2.outputs.length);
+        should.not.exist(t.getChangeOutput());
+        done();
+      });
+    });
+
     function doit(opts, doNotVerifyPayPro, doBroadcast, done) {
       clients[0].sendTxProposal(opts, function(err, x) {
         should.not.exist(err);
@@ -3256,7 +3271,7 @@ describe('client API', function() {
           done();
         });
       });
-    }); 
+    });
   });
   describe('#formatAmount', function() {
     it('should successfully format amount', function() {
