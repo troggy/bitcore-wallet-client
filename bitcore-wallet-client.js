@@ -108,6 +108,7 @@ API.prototype._fetchLatestNotifications = function(interval, cb) {
   }
 
   self.getNotifications(opts, function(err, notifications) {
+    console.log(notifications);
     if (err) {
       log.warn('Error receiving notifications.');
       log.debug(err);
@@ -1826,10 +1827,10 @@ API.prototype.broadcastRawTx = function(opts, cb) {
   });
 };
 
-API.prototype._doBroadcast = function(txp, cb) {
+API.prototype._doBroadcast = function(txp, opts, cb) {
   var self = this;
   var url = '/v1/txproposals/' + txp.id + '/broadcast/';
-  self._doPostRequest(url, {}, function(err, txp) {
+  self._doPostRequest(url, opts, function(err, txp) {
     if (err) return cb(err);
     return cb(null, txp);
   });
@@ -1843,7 +1844,7 @@ API.prototype._doBroadcast = function(txp, cb) {
  * @param {Callback} cb
  * @return {Callback} cb - Return error or object
  */
-API.prototype.broadcastTxProposal = function(txp, cb) {
+API.prototype.broadcastTxProposal = function(txp, opts, cb) {
   $.checkState(this.credentials && this.credentials.isComplete());
 
   var self = this;
@@ -1868,12 +1869,12 @@ API.prototype.broadcastTxProposal = function(txp, cb) {
         }),
       }, function(err, ack, memo) {
         if (err) return cb(err);
-        self._doBroadcast(txp, function(err, txp) {
+        self._doBroadcast(txp, opts, function(err, txp) {
           return cb(err, txp, memo);
         });
       });
     } else {
-      self._doBroadcast(txp, cb);
+      self._doBroadcast(txp, opts, cb);
     }
   });
 };
